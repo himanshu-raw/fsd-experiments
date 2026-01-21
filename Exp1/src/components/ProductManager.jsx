@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, updateProduct, removeProduct } from '../redux/slices/productsSlice';
-import { addToCart } from '../redux/slices/cartSlice';
+import { addToCart, incrementQuantity, decrementQuantity } from '../redux/slices/cartSlice';
 import { useAuth } from '../context/AuthContext';
 
 const ProductManager = () => {
@@ -73,9 +73,10 @@ const ProductManager = () => {
       <div className="product-grid">
         {products.map(product => (
           <div key={product.id} className="product-card">
-            <div>
+            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+              <div style={{ fontSize: '60px', marginBottom: '8px' }}>{product.image}</div>
               <h4 style={{ margin: '0 0 8px 0', color: '#2c3e50' }}>{product.name}</h4>
-              <p style={{ margin: '0 0 12px 0', fontSize: '20px', fontWeight: '700', color: '#3498db' }}>₹{product.price}</p>
+              <p style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '800', color: '#e74c3c', textDecoration: 'underline', letterSpacing: '0.5px' }}>₹{product.price.toLocaleString()}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button onClick={() => dispatch(addToCart(product))} style={{ backgroundColor: '#27ae60' }}>Add to Cart</button>
@@ -103,13 +104,26 @@ const ProductManager = () => {
         </div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {cart.map(item => (
-            <li key={item.id} style={{ padding: '12px', marginBottom: '8px', backgroundColor: 'white', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', border: '1px solid #ecf0f1' }}>
-              <span style={{ fontWeight: '500', color: '#2c3e50' }}>{item.name} <span style={{ color: '#95a5a6', fontSize: '12px' }}>× {item.quantity}</span></span>
-              <span style={{ fontWeight: '600', color: '#3498db' }}>₹{(item.price * item.quantity).toFixed(2)}</span>
+            <li key={item.id} style={{ padding: '12px', marginBottom: '8px', backgroundColor: 'white', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #ecf0f1' }}>
+              <div>
+                <span style={{ fontWeight: '500', color: '#2c3e50' }}>{item.name}</span>
+                <div style={{ marginTop: '4px', fontSize: '12px', color: '#7f8c8d' }}>₹{(item.price * item.quantity).toLocaleString()}</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button onClick={() => dispatch(decrementQuantity(item.id))} style={{ backgroundColor: '#e74c3c', padding: '6px 10px', fontSize: '14px', fontWeight: 'bold', width: '32px', height: '32px' }}>−</button>
+                <span style={{ fontWeight: '600', color: '#2c3e50', minWidth: '30px', textAlign: 'center' }}>{item.quantity}</span>
+                <button onClick={() => dispatch(incrementQuantity(item.id))} style={{ backgroundColor: '#27ae60', padding: '6px 10px', fontSize: '14px', fontWeight: 'bold', width: '32px', height: '32px' }}>+</button>
+              </div>
             </li>
           ))}
           {cart.length === 0 && <li style={{ textAlign: 'center', color: '#bdc3c7', padding: '20px' }}>Your cart is empty</li>}
         </ul>
+        {cart.length > 0 && (
+          <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '2px solid #ecf0f1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '16px', fontWeight: '700', color: '#2c3e50' }}>Grand Total:</span>
+            <span style={{ fontSize: '24px', fontWeight: '800', color: '#e74c3c' }}>₹{cart.reduce((total, item) => total + (item.price * item.quantity), 0).toLocaleString()}</span>
+          </div>
+        )}
       </div>
     </div>
   );

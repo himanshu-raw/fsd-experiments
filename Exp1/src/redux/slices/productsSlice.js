@@ -2,9 +2,14 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   items: [
-    { id: 1, name: 'Laptop', price: 999 },
-    { id: 2, name: 'Phone', price: 699 },
-    { id: 3, name: 'Headphones', price: 199 }
+    { id: 1, name: 'Mouse', price: 499, image: '🖱️' },
+    { id: 2, name: 'Keyboard', price: 1299, image: '⌨️' },
+    { id: 3, name: 'CPU', price: 12999, image: '🔧' },
+    { id: 4, name: 'Monitor', price: 8999, image: '🖥️' },
+    { id: 5, name: 'Motherboard', price: 5999, image: '📱' },
+    { id: 6, name: 'Hard Disk', price: 3499, image: '💾' },
+    { id: 7, name: 'RAM', price: 2499, image: '🔌' },
+    { id: 8, name: 'Cabinet', price: 1999, image: '📦' }
   ]
 };
 

@@ -11,13 +11,15 @@ const AppContent = () => {
   return (
     <div style={{ fontFamily: 'inherit' }}>
       <header>
-        <h1 style={{ letterSpacing: '0.5px' }}>Shopping Store</h1>
-        {isLoggedIn && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <span style={{ fontWeight: '500' }}>Welcome, <strong>{user.name}</strong></span>
-            <button onClick={logout}>Logout</button>
-          </div>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <h1 style={{ letterSpacing: '0.5px', margin: 0 }}>Shopyfy</h1>
+          {isLoggedIn && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '12px' }}>
+              <span style={{ fontWeight: '500' }}>Welcome, <strong>{user.name}</strong></span>
+              <button onClick={logout}>Logout</button>
+            </div>
+          )}
+        </div>
       </header>
 
       <main>
