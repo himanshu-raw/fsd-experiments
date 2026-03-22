@@ -15,8 +15,6 @@ import {
   CardContent,
   CardActions,
   Button,
-  Paper,
-  Avatar,
   Menu,
   MenuItem,
   Divider,
@@ -31,10 +29,12 @@ import {
   Brightness4,
   Brightness7,
   ExitToApp,
-  AccountCircle
+  AccountCircle,
+  MusicNote as MusicNoteIcon
 } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
+import TracksBrowser from './TracksBrowser';
 
 const StyledDashboardContainer = styled.div`
   display: flex;
@@ -52,6 +52,7 @@ const Dashboard = ({ onThemeToggle, isDarkMode }) => {
   const { currentUser, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [activeView, setActiveView] = useState('dashboard');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -73,6 +74,13 @@ const Dashboard = ({ onThemeToggle, isDarkMode }) => {
   };
 
   const drawerWidth = 240;
+
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, id: 'dashboard' },
+    { text: 'Spotify Tracks', icon: <MusicNoteIcon />, id: 'tracks' },
+    { text: 'Users', icon: <PeopleIcon />, id: 'users' },
+    { text: 'Settings', icon: <SettingsIcon />, id: 'settings' }
+  ];
 
   return (
     <StyledDashboardContainer>
@@ -139,111 +147,133 @@ const Dashboard = ({ onThemeToggle, isDarkMode }) => {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Dashboard', 'Users', 'Settings'].map((text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>
-                  {index === 0 ? (
-                    <DashboardIcon />
-                  ) : index === 1 ? (
-                    <PeopleIcon />
-                  ) : (
-                    <SettingsIcon />
-                  )}
+            {menuItems.map((item) => (
+              <ListItem
+                button
+                key={item.id}
+                selected={activeView === item.id}
+                onClick={() => {
+                  setActiveView(item.id);
+                  if (isMobile) toggleSidebar();
+                }}
+                sx={{
+                  backgroundColor: activeView === item.id ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                  color: activeView === item.id ? '#1DB954' : 'inherit',
+                  '&.Mui-selected': {
+                    backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                    borderLeft: '3px solid #1DB954',
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ color: activeView === item.id ? '#1DB954' : 'inherit' }}>
+                  {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={item.text} />
               </ListItem>
             ))}
           </List>
         </Box>
       </Drawer>
 
-      <StyledMainContent
-        style={{
-          marginLeft: isMobile ? 0 : sidebarOpen ? 0 : -drawerWidth,
-          width: '100%'
-        }}
-      >
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
-          <Box>
-            <Typography variant="overline" color="text.secondary" fontWeight="bold">
-              OVERVIEW
-            </Typography>
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Welcome back, {currentUser?.firstName || 'User'}!
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Here's what's happening with your platform today.
+      <StyledMainContent>
+        {activeView === 'dashboard' && (
+          <>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
+              <Box>
+                <Typography variant="overline" color="text.secondary" fontWeight="bold">
+                  OVERVIEW
+                </Typography>
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                  Welcome back, {currentUser?.firstName || 'User'}!
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Here's what's happening with your platform today.
+                </Typography>
+              </Box>
+              <Box>
+                <Button variant="contained" startIcon={<SettingsIcon />} sx={{ borderRadius: 2 }}>
+                  Manage Widgets
+                </Button>
+              </Box>
+            </Box>
+
+            <Grid container spacing={3}>
+              {[
+                { title: 'Total Users', value: '1,245', color: 'primary', trend: '+12%'},
+                { title: 'Revenue', value: '₹12,450', color: 'success', trend: '+5.2%' },
+                { title: 'Active Sessions', value: '342', color: 'info', trend: '-2.4%' },
+                { title: 'Pending Tasks', value: '28', color: 'warning', trend: '+8' }
+              ].map((metric, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Card sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box>
+                          <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+                            {metric.title.toUpperCase()}
+                          </Typography>
+                          <Typography variant="h4" component="div" color="text.primary" fontWeight="bold">
+                            {metric.value}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mt: 1, color: metric.trend.startsWith('+') ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
+                            {metric.trend} <Typography component="span" variant="caption" color="text.secondary">from last month</Typography>
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" gutterBottom fontWeight="bold">
+                Analytics & Performance
+              </Typography>
+            </Box>
+
+            <Grid container spacing={3} sx={{ mt: 0 }}>
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item}>
+                  <Card>
+                    <CardContent>
+                      <Typography color="text.secondary" gutterBottom>
+                        Metric {item}
+                      </Typography>
+                      <Typography variant="h5" component="div">
+                        {Math.floor(Math.random() * 1000)} Units
+                      </Typography>
+                      <Typography variant="body2">
+                        Performance data for card {item}.
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button size="small">View Details</Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        )}
+
+        {activeView === 'tracks' && <TracksBrowser />}
+
+        {activeView === 'users' && (
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <Typography variant="h5" color="text.secondary">
+              Users Management Coming Soon
             </Typography>
           </Box>
-          <Box>
-            <Button variant="contained" startIcon={<SettingsIcon />} sx={{ borderRadius: 2 }}>
-              Manage Widgets
-            </Button>
+        )}
+
+        {activeView === 'settings' && (
+          <Box sx={{ textAlign: 'center', py: 6 }}>
+            <Typography variant="h5" color="text.secondary">
+              Settings Coming Soon
+            </Typography>
           </Box>
-        </Box>
-
-        <Grid container spacing={3}>
-          {[
-            { title: 'Total Users', value: '1,245', color: 'primary', trend: '+12%'},
-            { title: 'Revenue', value: '₹12,450', color: 'success', trend: '+5.2%' },
-            { title: 'Active Sessions', value: '342', color: 'info', trend: '-2.4%' },
-            { title: 'Pending Tasks', value: '28', color: 'warning', trend: '+8' }
-          ].map((metric, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
-                        {metric.title.toUpperCase()}
-                      </Typography>
-                      <Typography variant="h4" component="div" color="text.primary" fontWeight="bold">
-                        {metric.value}
-                      </Typography>
-                      <Typography variant="body2" sx={{ mt: 1, color: metric.trend.startsWith('+') ? 'success.main' : 'error.main', fontWeight: 'bold' }}>
-                        {metric.trend} <Typography component="span" variant="caption" color="text.secondary">from last month</Typography>
-                      </Typography>
-                    </Box>
-                    <Box sx={{ color: `${metric.color}.main` }}>
-                      {metric.icon}
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5" gutterBottom fontWeight="bold">
-            Analytics & Performance
-          </Typography>
-        </Box>
-
-        <Grid container spacing={3} sx={{ mt: 0 }}>
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item}>
-              <Card>
-                <CardContent>
-                  <Typography color="text.secondary" gutterBottom>
-                    Metric {item}
-                  </Typography>
-                  <Typography variant="h5" component="div">
-                    {Math.floor(Math.random() * 1000)} Units
-                  </Typography>
-                  <Typography variant="body2">
-                    Performance data for card {item}.
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small">View Details</Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        
+        )}
       </StyledMainContent>
     </StyledDashboardContainer>
   );

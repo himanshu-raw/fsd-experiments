@@ -13,40 +13,89 @@ function App() {
   ];
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Exp4 - Components Live View</h1>
-
-      <section style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc' }}>
-        <h2>1. Button Component</h2>
-        <Button text="Click Me!" onClick={() => alert('Button was clicked!')} />
-      </section>
-
-      <section style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc' }}>
-        <h2>2. Form Component</h2>
-        <Form />
-      </section>
-
-      <section style={{ padding: '1rem', border: '1px solid #ccc' }}>
-        <h2>3. Dashboard Component</h2>
-        
-        <div style={{ marginBottom: '1rem' }}>
-          <strong>Change State: </strong>
-          <select value={dashboardState} onChange={(e) => setDashboardState(e.target.value)}>
-            <option value="loaded">Loaded</option>
-            <option value="loading">Loading</option>
-            <option value="empty">Empty</option>
-            <option value="error">Error</option>
-          </select>
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-content">
+          <div className="logo-section">
+            <div className="logo">⚛️</div>
+            <h1 className="app-title">Exp4 Showcase</h1>
+          </div>
+          <p className="app-subtitle">React Components Live Demo</p>
         </div>
+      </header>
 
-        <div style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '4px' }}>
-          <Dashboard 
-            state={dashboardState} 
-            data={mockData} 
-            error="Something went wrong while fetching data!" 
-          />
+      <main className="app-main">
+        <div className="container">
+          {/* Button Component Section */}
+          <section className="demo-section">
+            <div className="section-header">
+              <h2 className="section-title">Button Component</h2>
+              <p className="section-description">Interactive button with custom styling and click handlers</p>
+            </div>
+            <div className="demo-card">
+              <div className="demo-content">
+                <Button text="Click Me!" onClick={() => alert('✓ Button was clicked!')} />
+              </div>
+              <div className="demo-info">
+                <small>Props: text, onClick</small>
+              </div>
+            </div>
+          </section>
+
+          {/* Form Component Section */}
+          <section className="demo-section">
+            <div className="section-header">
+              <h2 className="section-title">Form Component</h2>
+              <p className="section-description">Form with input validation and submission handling</p>
+            </div>
+            <div className="demo-card">
+              <div className="demo-content">
+                <Form />
+              </div>
+              <div className="demo-info">
+                <small>Features: Input fields, Validation, Submit handler</small>
+              </div>
+            </div>
+          </section>
+
+          {/* Dashboard Component Section */}
+          <section className="demo-section">
+            <div className="section-header">
+              <h2 className="section-title">Dashboard Component</h2>
+              <p className="section-description">Dynamic dashboard with multiple states: loaded, loading, empty, and error</p>
+            </div>
+            <div className="demo-card">
+              <div className="state-selector-wrapper">
+                <label className="state-label">Demo State:</label>
+                <select 
+                  className="state-selector" 
+                  value={dashboardState} 
+                  onChange={(e) => setDashboardState(e.target.value)}
+                >
+                  <option value="loaded">✓ Loaded</option>
+                  <option value="loading">⟳ Loading</option>
+                  <option value="empty">○ Empty</option>
+                  <option value="error">✕ Error</option>
+                </select>
+              </div>
+              <div className="demo-content dashboard-demo">
+                <Dashboard 
+                  state={dashboardState} 
+                  data={mockData} 
+                  error="Something went wrong while fetching data!" 
+                />
+              </div>
+              <div className="demo-info">
+                <small>Props: state, data, error</small>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </main>
+
+      <footer className="app-footer">
+        <p>Exp 4 - React Components Testing & Live Demo</p>
+      </footer>
     </div>
   );
 }

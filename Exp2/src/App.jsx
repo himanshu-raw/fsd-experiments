@@ -16,6 +16,11 @@ const AppContent = () => {
       createTheme({
         palette: {
           mode,
+          primary: {
+            main: '#dc3545',
+            light: '#f8949a',
+            dark: '#c82333',
+          },
         },
         components: {
           MuiButton: {

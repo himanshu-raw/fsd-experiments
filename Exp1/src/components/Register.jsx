@@ -24,39 +24,41 @@ const Register = ({ onSwitchToLogin }) => {
 
   return (
     <div className="card login-container">
-      <h2>Register</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <h2 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '1.5rem' }}>Create Account</h2>
+      {error && <div style={{ backgroundColor: '#fadbd8', color: '#a93226', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', border: '1px solid #f1b3ac' }}>{error}</div>}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Username: </label>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', color: '#2c3e50' }}>Username</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
+            placeholder="Choose a username"
+            style={{ width: '100%', marginRight: 0 }}
             required
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Password: </label>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', color: '#2c3e50' }}>Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
+            placeholder="Create a password"
+            style={{ width: '100%', marginRight: 0 }}
             required
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Role: </label>
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', color: '#2c3e50' }}>Account Type</label>
+          <select value={role} onChange={(e) => setRole(e.target.value)} style={{ width: '100%', marginRight: 0 }}>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <button type="submit">Register</button>
-        <p style={{ marginTop: '10px', fontSize: '0.9em' }}>
-          Already have an account? <span style={{ color: '#1877f2', cursor: 'pointer', textDecoration: 'underline' }} onClick={onSwitchToLogin}>Login here</span>
+        <button type="submit" style={{ width: '100%' }}>Create Account</button>
+        <p style={{ marginTop: '16px', fontSize: '13px', textAlign: 'center', color: '#7f8c8d' }}>
+          Already have an account? <span style={{ color: '#3498db', cursor: 'pointer', textDecoration: 'underline', fontWeight: '600' }} onClick={onSwitchToLogin}>Sign in here</span>
         </p>
       </form>
     </div>
