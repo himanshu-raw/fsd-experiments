@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student API</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0b0e14;--surface:#12161f;--surface2:#1a1f2e;--border:#252b3b;--accent:#00d4aa;--accent2:#7c6af7;--accent3:#f7b731;--red:#ff4757;--green:#2ed573;--blue:#4dabf7;--text:#e8eaf0;--muted:#6b7280;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh;}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:58px;}
+.brand{display:flex;align-items:center;gap:.75rem;}
+.brand-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;font-size:.68rem;padding:.2rem .55rem;border-radius:4px;font-family:'JetBrains Mono',monospace;}
+.brand h1{font-size:.95rem;font-weight:700;}
+.status{display:flex;align-items:center;gap:.5rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s;}
+.dot.online{background:var(--green);box-shadow:0 0 6px var(--green);}
+.dot.offline{background:var(--red);}
+.status-text{font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.container{max-width:1100px;margin:0 auto;padding:2rem;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center;}
+.stat-num{font-size:2rem;font-weight:700;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.stat-label{font-size:.7rem;color:var(--muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.07em;}
+.tabs{display:flex;gap:.3rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.tab{padding:.4rem .9rem;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;font-family:'Sora',sans-serif;}
+.tab:hover{border-color:var(--accent2);color:var(--text);}
+.tab.active{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.panel{display:none;}
+.panel.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;}
+.card-title{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}.split{grid-template-columns:1fr !important;}}
+.field label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;}
+.field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-family:'Sora',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--accent2);}
+.btn{padding:.55rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;border:none;font-family:'Sora',sans-serif;transition:opacity .2s;}
+.btn-accent{background:var(--accent);color:#000;}
+.btn-blue{background:var(--blue);color:#000;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn:hover{opacity:.8;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;}
+.student-list{display:grid;gap:.75rem;}
+.s-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;transition:border-color .2s;}
+.s-card:hover{border-color:var(--accent2);}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
+.s-info{flex:1;min-width:0;}
+.s-name{font-size:.9rem;font-weight:700;}
+.s-meta{font-size:.72rem;color:var(--muted);margin-top:.2rem;font-family:'JetBrains Mono',monospace;}
+.s-dept{display:inline-block;font-size:.63rem;padding:.12rem .45rem;border-radius:20px;background:rgba(0,212,170,.15);color:var(--accent);border:1px solid rgba(0,212,170,.3);margin-left:.4rem;font-weight:600;}
+.s-actions{display:flex;gap:.5rem;}
+.btn-sm{padding:.3rem .7rem;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:600;border:none;font-family:'Sora',sans-serif;}
+.btn-sm-edit{background:rgba(247,183,49,.15);color:var(--accent3);}
+.btn-sm-del{background:rgba(255,71,87,.15);color:var(--red);}
+.empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:.85rem;}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1.2rem;font-size:.8rem;opacity:0;transition:opacity .3s;z-index:999;max-width:280px;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.success{border-color:var(--green);color:var(--green);}
+.toast.error{border-color:var(--red);color:var(--red);}
+.err-msg{font-size:.72rem;color:var(--red);margin-top:.4rem;display:none;}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.method{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:3px;margin-right:.3rem;}
+.GET{background:rgba(46,213,115,.15);color:var(--green);}
+.POST{background:rgba(77,171,247,.15);color:var(--blue);}
+.PUT{background:rgba(247,183,49,.15);color:var(--accent3);}
+.DELETE{background:rgba(255,71,87,.15);color:var(--red);}
+.log-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;max-height:220px;overflow-y:auto;color:var(--muted);}
+.log-entry{padding:.15rem 0;border-bottom:1px solid rgba(37,43,59,.4);}
+.log-entry.ok{color:var(--green);}
+.log-entry.err{color:var(--red);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-badge">SPRING</div>
+    <h1>Student REST API</h1>
+  </div>
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <span class="status-text" id="status-text">connecting...</span>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="s-total">—</div><div class="stat-label">Students</div></div>
+    <div class="stat"><div class="stat-num" id="s-depts">—</div><div class="stat-label">Departments</div></div>
+    <div class="stat"><div class="stat-num" id="s-avg">—</div><div class="stat-label">Avg Age</div></div>
+    <div class="stat"><div class="stat-num" style="font-size:1.1rem;color:var(--accent2);">:8080</div><div class="stat-label">Port</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('all',this)">All Students</button>
+    <button class="tab" onclick="switchTab('add',this)">Add Student</button>
+    <button class="tab" onclick="switchTab('manage',this)">Update / Delete</button>
+    <button class="tab" onclick="switchTab('logs',this)">API Logs</button>
+  </div>
+
+  <div id="panel-all" class="panel active">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+        <div class="card-title" style="margin:0;">All Students</div>
+        <button class="btn btn-accent" onclick="loadAll()">↺ Refresh</button>
+      </div>
+      <div class="student-list" id="student-list"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <div id="panel-add" class="panel">
+    <div class="card">
+      <div class="card-title">Add New Student</div>
+      <div class="form-grid">
+        <div class="field"><label>Full Name</label><input type="text" id="a-name" placeholder="e.g. Alice Smith"/></div>
+        <div class="field"><label>Email</label><input type="email" id="a-email" placeholder="alice@uni.edu"/></div>
+        <div class="field"><label>Age</label><input type="number" id="a-age" placeholder="20" min="16" max="60"/></div>
+        <div class="field"><label>Department</label><input type="text" id="a-dept" placeholder="e.g. CS"/></div>
+      </div>
+      <div class="err-msg" id="a-err"></div>
+      <div class="btn-row">
+        <button class="btn btn-accent" onclick="addStudent()">+ Add Student</button>
+        <button class="btn btn-ghost" onclick="clearAdd()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-manage" class="panel">
+    <div class="split">
+      <div class="card">
+        <div class="card-title">Update Student</div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Student ID</label><input type="number" id="u-id" placeholder="ID"/></div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Name</label><input type="text" id="u-name" placeholder="Name"/></div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Email</label><input type="email" id="u-email" placeholder="Email"/></div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Age</label><input type="number" id="u-age" placeholder="Age"/></div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Department</label><input type="text" id="u-dept" placeholder="Department"/></div>
+        <button class="btn btn-blue" onclick="updateStudent()">Update Student</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Find by ID</div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Student ID</label><input type="number" id="f-id" placeholder="ID"/></div>
+        <div class="btn-row" style="margin-bottom:1rem;">
+          <button class="btn btn-accent" onclick="findStudent()">Find</button>
+        </div>
+        <div id="found-result"></div>
+        <hr style="border-color:var(--border);margin:1.2rem 0;"/>
+        <div class="card-title">Delete Student</div>
+        <div class="field" style="margin-bottom:.75rem;"><label>Student ID</label><input type="number" id="d-id" placeholder="ID"/></div>
+        <button class="btn btn-red" onclick="deleteStudent()">Delete Student</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-logs" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="card-title" style="margin:0;">API Request Logs</div>
+        <button class="btn btn-ghost" onclick="clearLogs()">Clear</button>
+      </div>
+      <div class="log-box" id="log-box"><div>No requests yet...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Endpoint Reference</div>
+      <div style="display:grid;gap:.6rem;font-size:.78rem;font-family:'JetBrains Mono',monospace;">
+        <div><span class="method GET">GET</span>/api/students</div>
+        <div><span class="method GET">GET</span>/api/students/{id}</div>
+        <div><span class="method POST">POST</span>/api/students</div>
+        <div><span class="method PUT">PUT</span>/api/students/{id}</div>
+        <div><span class="method DELETE">DELETE</span>/api/students/{id}</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE='/api/students';
+const logs=[];
+
+function addLog(method,url,status,ok){
+  const time=new Date().toLocaleTimeString();
+  logs.unshift({method,url,status,ok,time});
+  if(logs.length>50)logs.pop();
+  const box=document.getElementById('log-box');
+  if(box)box.innerHTML=logs.map(l=>`<div class="log-entry ${l.ok?'ok':'err'}">[${l.time}] ${l.method} ${l.url} → ${l.status}</div>`).join('');
+}
+
+function clearLogs(){logs.length=0;document.getElementById('log-box').innerHTML='<div>No requests yet...</div>';}
+
+async function req(method,url,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(url,opts);
+  addLog(method,url,r.status,r.ok);
+  return r;
+}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',3000);
+}
+
+function initials(name){return name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'??';}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='all')loadAll();
+}
+
+async function loadAll(){
+  const el=document.getElementById('student-list');
+  try{
+    const r=await req('GET',BASE);
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    document.getElementById('dot').className='dot online';
+    document.getElementById('status-text').textContent='API online';
+    document.getElementById('s-total').textContent=data.length;
+    document.getElementById('s-depts').textContent=new Set(data.map(s=>s.department)).size||0;
+    document.getElementById('s-avg').textContent=data.length?Math.round(data.reduce((a,s)=>a+s.age,0)/data.length):'—';
+    if(!data.length){el.innerHTML='<div class="empty">No students yet. Add one!</div>';return;}
+    el.innerHTML=data.map(s=>`
+      <div class="s-card">
+        <div class="avatar">${initials(s.name)}</div>
+        <div class="s-info">
+          <div class="s-name">${s.name}<span class="s-dept">${s.department}</span></div>
+          <div class="s-meta">id:${s.id} · ${s.email} · age:${s.age}</div>
+        </div>
+        <div class="s-actions">
+          <button class="btn-sm btn-sm-edit" onclick="prefill(${s.id},'${s.name}','${s.email}',${s.age},'${s.department}')">Edit</button>
+          <button class="btn-sm btn-sm-del" onclick="quickDel(${s.id})">Delete</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    document.getElementById('dot').className='dot offline';
+    document.getElementById('status-text').textContent='API offline';
+    el.innerHTML='<div class="empty">Cannot reach server. Is Spring Boot running?</div>';
+  }
+}
+
+async function addStudent(){
+  const name=document.getElementById('a-name').value.trim();
+  const email=document.getElementById('a-email').value.trim();
+  const age=parseInt(document.getElementById('a-age').value);
+  const dept=document.getElementById('a-dept').value.trim();
+  const err=document.getElementById('a-err');
+  if(!name||!email||!age||!dept){err.style.display='block';err.textContent='All fields are required.';return;}
+  err.style.display='none';
+  try{
+    const r=await req('POST',BASE,{name,email,age,department:dept});
+    if(r.status===400){const e=await r.json();err.style.display='block';err.textContent=Object.values(e).join(' · ');return;}
+    if(!r.ok)throw new Error();
+    toast('Student added!','success');
+    clearAdd();
+  }catch(e){toast('Error adding student','error');}
+}
+
+function clearAdd(){
+  ['a-name','a-email','a-age','a-dept'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-err').style.display='none';
+}
+
+async function findStudent(){
+  const id=document.getElementById('f-id').value;
+  if(!id)return;
+  const box=document.getElementById('found-result');
+  try{
+    const r=await req('GET',`${BASE}/${id}`);
+    if(r.status===404){box.innerHTML='<div style="color:var(--red);font-size:.8rem;">Student not found.</div>';return;}
+    const s=await r.json();
+    box.innerHTML=`<div class="s-card"><div class="avatar">${initials(s.name)}</div><div class="s-info"><div class="s-name">${s.name}<span class="s-dept">${s.department}</span></div><div class="s-meta">id:${s.id} · ${s.email} · age:${s.age}</div></div></div>`;
+  }catch(e){toast('Error','error');}
+}
+
+async function updateStudent(){
+  const id=document.getElementById('u-id').value;
+  const name=document.getElementById('u-name').value.trim();
+  const email=document.getElementById('u-email').value.trim();
+  const age=parseInt(document.getElementById('u-age').value);
+  const dept=document.getElementById('u-dept').value.trim();
+  if(!id||!name||!email||!age||!dept){toast('Fill all update fields','error');return;}
+  try{
+    const r=await req('PUT',`${BASE}/${id}`,{name,email,age,department:dept});
+    if(r.status===404){toast('Student not found','error');return;}
+    if(!r.ok)throw new Error();
+    toast('Student updated!','success');
+  }catch(e){toast('Error updating','error');}
+}
+
+async function deleteStudent(){
+  const id=document.getElementById('d-id').value;
+  if(!id)return;
+  if(!confirm(`Delete student ID ${id}?`))return;
+  await doDel(id);
+}
+
+async function quickDel(id){
+  if(!confirm(`Delete student ID ${id}?`))return;
+  await doDel(id);
+  loadAll();
+}
+
+async function doDel(id){
+  try{
+    const r=await req('DELETE',`${BASE}/${id}`);
+    if(r.status===404){toast('Student not found','error');return;}
+    toast('Deleted!','success');
+    document.getElementById('d-id').value='';
+  }catch(e){toast('Error deleting','error');}
+}
+
+function prefill(id,name,email,age,dept){
+  document.getElementById('u-id').value=id;
+  document.getElementById('u-name').value=name;
+  document.getElementById('u-email').value=email;
+  document.getElementById('u-age').value=age;
+  document.getElementById('u-dept').value=dept;
+  document.querySelectorAll('.tab')[2].click();
+}
+
+loadAll();
+</script>
+</body>
+</html>
