@@ -1,0 +1,89 @@
+name: Exp10 CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy-backend-ec2:
+    name: Deploy Backend to AWS EC2
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('backend/pom.xml') != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy backend container on EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker pull ghcr.io/${{ github.repository_owner }}/exp10-backend:latest
+            docker stop exp10-backend || true
+            docker rm exp10-backend || true
+            docker run -d --name exp10-backend -p 8080:8080 --restart unless-stopped ghcr.io/${{ github.repository_owner }}/exp10-backend:latest
+
+  deploy-frontend-firebase:
+    name: Deploy Frontend to Firebase Hosting
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('frontend/package.json') != '' }}
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting (live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          entryPoint: ./frontend
+
+  update-custom-domain:
+    name: Optional | Ensure Firebase custom domain
+    runs-on: ubuntu-latest
+    needs: deploy-frontend-firebase
+    if: ${{ secrets.FIREBASE_CUSTOM_DOMAIN != '' && secrets.FIREBASE_SITE_ID != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Attach custom domain to Firebase Hosting site
+        env:
+          FIREBASE_ACCESS_TOKEN: ${{ secrets.FIREBASE_ACCESS_TOKEN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_SITE_ID: ${{ secrets.FIREBASE_SITE_ID }}
+          FIREBASE_CUSTOM_DOMAIN: ${{ secrets.FIREBASE_CUSTOM_DOMAIN }}
+        run: bash ./scripts/update-firebase-domain.sh
